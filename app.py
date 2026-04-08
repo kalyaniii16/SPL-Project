@@ -2,22 +2,14 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-# ==============================
-# LOAD MODEL FILES
-# ==============================
 model = pickle.load(open("model.pkl", "rb"))
 scaler = pickle.load(open("scaler.pkl", "rb"))
 columns = pickle.load(open("columns.pkl", "rb"))
 
-# ==============================
-# TITLE
-# ==============================
 st.title("🎓 Burnout Prediction System")
 st.write("Enter student details and click Predict")
 
-# ==============================
-# USER INPUT
-# ==============================
+#User Input
 
 st.subheader("📋 Student Details")
 
@@ -66,14 +58,9 @@ sleep_quality = st.selectbox("Sleep Quality", ["Select", "Poor", "Average", "Goo
 
 internet_quality = st.selectbox("Internet Quality", ["Select", "Poor", "Average", "Good"])
 
-# ==============================
-# PREDICT BUTTON
-# ==============================
+
 if st.button("🔍 Predict Burnout"):
 
-    # ==============================
-    # VALIDATION
-    # ==============================
     if (
         gender == "Select" or course == "Select" or
         stress_level == "Select" or sleep_quality == "Select" or
@@ -85,9 +72,6 @@ if st.button("🔍 Predict Burnout"):
         st.warning("⚠️ Please enter valid numeric values")
 
     else:
-        # ==============================
-        # CREATE INPUT DICTIONARY
-        # ==============================
         user_input = {
             "age": age,
             "gender": 1 if gender == "Male" else 0,
@@ -109,30 +93,25 @@ if st.button("🔍 Predict Burnout"):
             "internet_quality": {"Poor": 0, "Average": 1, "Good": 2}[internet_quality]
         }
 
-        # ==============================
-        # FEATURE ENGINEERING
-        # ==============================
+        # Feature Engineering - Lifestyle Score
+
         user_input["lifestyle_score"] = (
             daily_sleep_hours + physical_activity_hours - screen_time_hours
         )
 
         st.info(f"Lifestyle Score: {user_input['lifestyle_score']}")
 
-        # ==============================
-        # CREATE DATAFRAME
-        # ==============================
+        #Create DataFrame for model input
+
         input_df = pd.DataFrame([user_input])
         input_df = input_df[columns]
 
-        # ==============================
-        # SCALE & PREDICT
-        # ==============================
+       # Scale the input features
+
         input_scaled = scaler.transform(input_df)
         prediction = model.predict(input_scaled)[0]
 
-        # ==============================
-        # OUTPUT
-        # ==============================
+        #Output
         st.subheader("📊 Prediction Result")
 
         if prediction == 0:
